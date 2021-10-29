@@ -1,0 +1,59 @@
+---
+- name: Download binary with checksum.
+  get_url:
+    url: "https://releases.mattermost.com/{{version}}/mattermost-{{version}}-linux-amd64.tar.gz"
+    dest: /tmp/
+    sha256sum: "{{checksum_sha256}}"
+
+- name: Extract the Mattermost Server files.
+  ansible.builtin.unarchive:
+    src: "/tmp/mattermost-{{version}}-linux-amd64.tar.gz"
+    dest: "{{path}}/{{folder_name}}"
+    remote_src: yes
+
+- name: Create group.
+  ansible.builtin.group:
+    name: "{{group}}"
+    state: present
+
+- name: Create user.
+  ansible.builtin.user:
+    name: "{{user}}"
+    comment: Mattermost user
+    group: "{{group}}"
+
+- name: Create the storage directory for files.
+  ansible.builtin.file:
+    path: "{{path}}/{{folder_name}}"
+    state: directory
+    owner: "{{user}}"
+    group: "{{group}}"
+    mode: '0755'
+    recurse: yes
+
+- name: Set up the config.
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{config_path}}"
+    owner: "{{user}}"
+    group: "{{group}}"
+    mode: '0755'
+
+- name: Set up systemd init daemon.
+  ansible.builtin.copy:
+    src: mattermost.service
+    dest: /etc/systemd/system/mattermost.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable mattermost
+  ansible.builtin.service:
+    name: mattermost
+    enabled: yes
+
+- name: Make sure mattermost is running
+  ansible.builtin.systemd:
+    state: restarted
+    name: mattermost
+    daemon_reload: yes

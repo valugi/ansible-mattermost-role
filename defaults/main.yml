@@ -1,0 +1,14 @@
+---
+version: 6.0.1
+checksum_sha256: e05ad0c7cfd63b1846924c6bce0f6330c4952b31babfec197a98d0ded9d9287e
+path: /opt
+folder_name: mattermost
+data_path: /opt/mattermost/data
+config_path: /opt/mattermost/config/config.json
+user: mattermost
+group: mattermost
+driver: mysql
+database_user: mattermost
+datasource: "mmuser:<mmuser-password>@tcp(<host-name-or-IP>:3306)/mattermost?charset=utf8mb4,utf8&writeTimeout=30s"
+url: "https://mattermost.example.com"
+
